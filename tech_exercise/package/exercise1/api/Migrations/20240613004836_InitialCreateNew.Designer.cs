@@ -11,14 +11,14 @@ using StargateAPI.Business.Data;
 namespace StargateAPI.Migrations
 {
     [DbContext(typeof(StargateContext))]
-    [Migration("20240122154939_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20240613004836_InitialCreateNew")]
+    partial class InitialCreateNew
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "7.0.15");
+            modelBuilder.HasAnnotation("ProductVersion", "8.0.6");
 
             modelBuilder.Entity("StargateAPI.Business.Data.AstronautDetail", b =>
                 {
@@ -29,7 +29,7 @@ namespace StargateAPI.Migrations
                     b.Property<DateTime?>("CareerEndDate")
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTime?>("CareerStartDate")
+                    b.Property<DateTime>("CareerStartDate")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("CurrentDutyTitle")
@@ -49,6 +49,16 @@ namespace StargateAPI.Migrations
                         .IsUnique();
 
                     b.ToTable("AstronautDetail");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            CareerStartDate = new DateTime(2024, 6, 12, 19, 48, 36, 135, DateTimeKind.Local).AddTicks(5875),
+                            CurrentDutyTitle = "Commander",
+                            CurrentRank = "1LT",
+                            PersonId = 1
+                        });
                 });
 
             modelBuilder.Entity("StargateAPI.Business.Data.AstronautDuty", b =>
@@ -79,6 +89,16 @@ namespace StargateAPI.Migrations
                     b.HasIndex("PersonId");
 
                     b.ToTable("AstronautDuty");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            DutyStartDate = new DateTime(2024, 6, 12, 19, 48, 36, 135, DateTimeKind.Local).AddTicks(5918),
+                            DutyTitle = "Commander",
+                            PersonId = 1,
+                            Rank = "1LT"
+                        });
                 });
 
             modelBuilder.Entity("StargateAPI.Business.Data.Person", b =>
@@ -93,16 +113,29 @@ namespace StargateAPI.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Name")
+                        .IsUnique();
+
                     b.ToTable("Person");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "John Doe"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "Jane Doe"
+                        });
                 });
 
             modelBuilder.Entity("StargateAPI.Business.Data.AstronautDetail", b =>
                 {
                     b.HasOne("StargateAPI.Business.Data.Person", "Person")
                         .WithOne("AstronautDetail")
-                        .HasForeignKey("StargateAPI.Business.Data.AstronautDetail", "PersonId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("StargateAPI.Business.Data.AstronautDetail", "PersonId");
 
                     b.Navigation("Person");
                 });
@@ -111,9 +144,7 @@ namespace StargateAPI.Migrations
                 {
                     b.HasOne("StargateAPI.Business.Data.Person", "Person")
                         .WithMany("AstronautDuties")
-                        .HasForeignKey("PersonId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("PersonId");
 
                     b.Navigation("Person");
                 });

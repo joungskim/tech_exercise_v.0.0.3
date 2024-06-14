@@ -157,5 +157,4 @@ namespace StargateApi.Test
 
         // TODO: Add more paths to test for better coverage
     }
-
 }
