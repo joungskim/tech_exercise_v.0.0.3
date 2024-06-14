@@ -20,7 +20,7 @@ namespace StargateAPI.Business.Services
         }
 
         // Rule 5: A Person's Previous Duty End Date is set to the day before the New Astronaut Duty Start Date
-        public async Task UpdatePreviousDutyEndDateAsync(int personId, DateTime dutyStartDate)
+        public async Task<AstronautDuty?> UpdatePreviousDutyEndDateAsync(int personId, DateTime dutyStartDate)
         {
             var previousAstronautDuty = await GetLatestAstronautDutyAsync(personId);
             if (previousAstronautDuty != null)
@@ -30,10 +30,11 @@ namespace StargateAPI.Business.Services
                 previousAstronautDuty.DutyEndDate = dutyStartDate.Date.AddDays(-1);
                 _context.AstronautDuties.Update(previousAstronautDuty);
             }
+            return previousAstronautDuty;
         }
 
         // Rule 3: A Person will only ever hold one current Astronaut Duty Title, Start Date, and Rank at a time.
-        public async Task CreateOrUpdateAstronautDetailAsync(Person person, string dutyTitle, string rank, DateTime dutyStartDate)
+        public async Task<AstronautDetail> CreateOrUpdateAstronautDetailAsync(Person person, string dutyTitle, string rank, DateTime dutyStartDate)
         {
             ValidatePerson(person);
             ValidateStringParameter(dutyTitle, nameof(dutyTitle));
@@ -64,11 +65,13 @@ namespace StargateAPI.Business.Services
                 astronautDetail.CareerEndDate = null;
                 _context.AstronautDetails.Update(astronautDetail);
             }
+
+            return astronautDetail;
         }
 
         // Rule 6: A Person is classified as 'Retired' when a Duty Title is 'RETIRED'.
         // Rule 7: A Person's Career End Date is one day before the Retired Duty Start Date.
-        public async Task HandleRetiredDutyAsync(Person person, DateTime dutyStartDate, string rank)
+        public async Task<AstronautDuty?> HandleRetiredDutyAsync(Person person, DateTime dutyStartDate, string rank)
         {
             ValidatePerson(person);
             ValidateStringParameter(rank, nameof(rank));
@@ -81,7 +84,7 @@ namespace StargateAPI.Business.Services
                 currentAstronautDetail.CurrentRank = rank;
                 _context.AstronautDetails.Update(currentAstronautDetail);
 
-                await UpdatePreviousDutyEndDateAsync(person.Id, dutyStartDate);
+                var previousDuty = await UpdatePreviousDutyEndDateAsync(person.Id, dutyStartDate);
                 var newAstronautDuty = new AstronautDuty
                 {
                     PersonId = person.Id,
@@ -92,6 +95,8 @@ namespace StargateAPI.Business.Services
                     Person = person
                 };
                 await _context.AstronautDuties.AddAsync(newAstronautDuty);
+
+                return newAstronautDuty;
             }
             else
             {

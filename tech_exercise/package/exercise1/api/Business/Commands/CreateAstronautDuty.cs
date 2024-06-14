@@ -83,17 +83,21 @@ namespace StargateAPI.Business.Commands
 
                     await _context.AstronautDuties.AddAsync(newAstronautDuty);
                     await _dutyService.CreateOrUpdateAstronautDetailAsync(person, request.DutyTitle, request.Rank, request.DutyStartDate);
+
+                    await _context.SaveChangesAsync();
+
+                    return new CreateAstronautDutyResult { Id = newAstronautDuty.Id };
                 }
 
                 await _context.SaveChangesAsync();
 
-                return new CreateAstronautDutyResult();
+                return new CreateAstronautDutyResult { Id = null };
             }
 
             throw new BadHttpRequestException("Person not found", StatusCodes.Status400BadRequest);
         }
     }
-
+    
     // Command result object
     public class CreateAstronautDutyResult : BaseResponse
     {
