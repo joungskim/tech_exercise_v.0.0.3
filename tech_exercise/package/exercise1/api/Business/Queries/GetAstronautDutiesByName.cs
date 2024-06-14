@@ -29,6 +29,13 @@ namespace StargateAPI.Business.Queries
 
             var person = await _context.Connection.QueryFirstOrDefaultAsync<PersonAstronaut>(query);
 
+            if (person == null)
+            {
+                result.Success = false;
+                result.Message = $"Person with name {request.Name} not found.";
+                return result;
+            }
+
             result.Person = person;
 
             query = $"SELECT * FROM [AstronautDuty] WHERE {person.PersonId} = PersonId Order By DutyStartDate Desc";

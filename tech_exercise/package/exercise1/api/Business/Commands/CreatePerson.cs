@@ -18,11 +18,14 @@ namespace StargateAPI.Business.Commands
         {
             _context = context;
         }
+
         public Task Process(CreatePerson request, CancellationToken cancellationToken)
         {
-            var person = _context.People.AsNoTracking().FirstOrDefault(z => z.Name == request.Name);
-
-            if (person is not null) throw new BadHttpRequestException("Bad Request");
+            var person = _context.People.AsNoTracking().FirstOrDefault(p => p.Name == request.Name);
+            if (person != null) 
+            {
+                throw new BadHttpRequestException("Person already exists with this name.");
+            }
 
             return Task.CompletedTask;
         }
@@ -36,23 +39,21 @@ namespace StargateAPI.Business.Commands
         {
             _context = context;
         }
+
         public async Task<CreatePersonResult> Handle(CreatePerson request, CancellationToken cancellationToken)
         {
+            var newPerson = new Person()
+            {
+                Name = request.Name
+            };
 
-                var newPerson = new Person()
-                {
-                   Name = request.Name
-                };
+            await _context.People.AddAsync(newPerson);
+            await _context.SaveChangesAsync();
 
-                await _context.People.AddAsync(newPerson);
-
-                await _context.SaveChangesAsync();
-
-                return new CreatePersonResult()
-                {
-                    Id = newPerson.Id
-                };
-          
+            return new CreatePersonResult()
+            {
+                Id = newPerson.Id
+            };
         }
     }
 
