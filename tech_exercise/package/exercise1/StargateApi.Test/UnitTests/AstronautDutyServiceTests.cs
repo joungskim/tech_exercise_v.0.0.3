@@ -85,7 +85,6 @@ namespace StargateApi.Test
 
             _context.AstronautDuties.AddRange(duties);
             _context.SaveChanges();
- & Assert
             var ex = Assert.ThrowsAsync<BadHttpRequestException>(() => _service.UpdatePreviousDutyEndDateAsync(personId, dutyStartDate));
             Assert.That(ex.StatusCode, Is.EqualTo(StatusCodes.Status400BadRequest));
             Assert.That(ex.Message, Is.EqualTo("Duty start date must be after the end date of the previous duty start date"));
